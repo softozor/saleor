@@ -1,4 +1,7 @@
+from django.conf import settings
+
 import graphene
+from graphene_django.debug import DjangoDebug
 
 from .account.schema import AccountMutations, AccountQueries
 from .checkout.schema import CheckoutMutations, CheckoutQueries
@@ -17,6 +20,10 @@ class Query(AccountQueries, CheckoutQueries, DiscountQueries, MenuQueries,
             OrderQueries, PageQueries, PaymentQueries, ProductQueries,
             ShippingQueries, ShopQueries):
     node = graphene.Node.Field()
+    # Only add the __debug field to root query if GRAPHENE_DEBUG is True
+    if settings.GRAPHENE_DEBUG:
+        debug = graphene.Field(DjangoDebug, name='__debug')
+
 
 
 class Mutations(AccountMutations, CheckoutMutations, CoreMutations,

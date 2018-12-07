@@ -584,7 +584,19 @@ PAYMENT_GATEWAYS = {
     }
 }
 
+
+
+#########
+## Graphene configuration
+#########b
+GRAPHENE_DEBUG = get_bool_from_env('GRAPHENE_DEBUG', False)
+
 GRAPHENE = {
     'RELAY_CONNECTION_ENFORCE_FIRST_OR_LAST': True,
-    'RELAY_CONNECTION_MAX_LIMIT': 100
+    'RELAY_CONNECTION_MAX_LIMIT': 100,
+    'MIDDLEWARE': []
 }
+if GRAPHENE_DEBUG:
+    print("Adding Graphene debugging")
+    # Add Graphene debugging (show SQL requests )
+    GRAPHENE['MIDDLEWARE'] += ['graphene_django.debug.DjangoDebugMiddleware']
