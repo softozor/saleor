@@ -1,0 +1,2 @@
+export DJANGO_SETTINGS_MODULE="shopozor-tests.settings"
+py.test
