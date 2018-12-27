@@ -36,3 +36,6 @@ webpack-bundle.json
 !/templates/templated_email/compiled/.gitkeep
 
 /saleor-env/
+
+# added for shopozor
+.env
