@@ -2,14 +2,13 @@ from unittest.mock import MagicMock, Mock
 
 import graphene
 import pytest
-from tests.api.utils import get_graphql_content
 
 from saleor.core.utils.taxes import ZERO_TAXED_MONEY
-from saleor.graphql.core.types import ReportingPeriod
+from saleor.graphql.core.enums import ReportingPeriod
 from saleor.graphql.order.mutations.orders import (
     clean_order_cancel, clean_order_capture, clean_order_mark_as_paid,
     clean_refund_payment, clean_void_payment)
-from saleor.graphql.order.types import OrderEventsEmailsEnum, OrderStatusFilter
+from saleor.graphql.order.enums import OrderEventsEmailsEnum, OrderStatusFilter
 from saleor.graphql.order.utils import can_finalize_draft_order
 from saleor.graphql.payment.types import PaymentChargeStatusEnum
 from saleor.order import OrderEvents, OrderEventsEmails, OrderStatus
@@ -17,6 +16,7 @@ from saleor.order.models import Order, OrderEvent
 from saleor.payment import CustomPaymentChoices
 from saleor.payment.models import Payment
 from saleor.shipping.models import ShippingMethod
+from tests.api.utils import get_graphql_content
 
 from .utils import assert_no_permission
 
@@ -522,14 +522,14 @@ def test_draft_order_complete_anonymous_user_no_email(
     assert data['status'] == OrderStatus.UNFULFILLED.upper()
 
 
-DRAFT_ORDER_LINE_CREATE_MUTATION = """
-    mutation DraftOrderLineCreate($orderId: ID!, $variantId: ID!, $quantity: Int!) {
-        draftOrderLineCreate(id: $orderId, input: {variantId: $variantId, quantity: $quantity}) {
+DRAFT_ORDER_LINES_CREATE_MUTATION = """
+    mutation DraftOrderLinesCreate($orderId: ID!, $variantId: ID!, $quantity: Int!) {
+        draftOrderLinesCreate(id: $orderId, input: [{variantId: $variantId, quantity: $quantity}]) {
             errors {
                 field
                 message
             }
-            orderLine {
+            orderLines {
                 id
                 quantity
                 productSku
@@ -546,9 +546,9 @@ DRAFT_ORDER_LINE_CREATE_MUTATION = """
 """
 
 
-def test_draft_order_line_create(
+def test_draft_order_lines_create(
         draft_order, permission_manage_orders, staff_api_client):
-    query = DRAFT_ORDER_LINE_CREATE_MUTATION
+    query = DRAFT_ORDER_LINES_CREATE_MUTATION
     order = draft_order
     line = order.lines.first()
     variant = line.variant
@@ -567,22 +567,22 @@ def test_draft_order_line_create(
     staff_api_client.user.user_permissions.add(permission_manage_orders)
     response = staff_api_client.post_graphql(query, variables)
     content = get_graphql_content(response)
-    data = content['data']['draftOrderLineCreate']
-    assert data['orderLine']['productSku'] == variant.sku
-    assert data['orderLine']['quantity'] == old_quantity + quantity
+    data = content['data']['draftOrderLinesCreate']
+    assert data['orderLines'][0]['productSku'] == variant.sku
+    assert data['orderLines'][0]['quantity'] == old_quantity + quantity
 
     # mutation should fail when quantity is lower than 1
     variables = {'orderId': order_id, 'variantId': variant_id, 'quantity': 0}
     response = staff_api_client.post_graphql(query, variables)
     content = get_graphql_content(response)
-    data = content['data']['draftOrderLineCreate']
+    data = content['data']['draftOrderLinesCreate']
     assert data['errors']
     assert data['errors'][0]['field'] == 'quantity'
 
 
 def test_require_draft_order_when_creating_lines(
         order_with_lines, staff_api_client, permission_manage_orders):
-    query = DRAFT_ORDER_LINE_CREATE_MUTATION
+    query = DRAFT_ORDER_LINES_CREATE_MUTATION
     order = order_with_lines
     line = order.lines.first()
     variant = line.variant
@@ -592,7 +592,7 @@ def test_require_draft_order_when_creating_lines(
     response = staff_api_client.post_graphql(
         query, variables, permissions=[permission_manage_orders])
     content = get_graphql_content(response)
-    data = content['data']['draftOrderLineCreate']
+    data = content['data']['draftOrderLinesCreate']
     assert data['errors']
 
 
@@ -1262,6 +1262,23 @@ def test_order_update_shipping_incorrect_shipping_method(
     assert data['errors'][0]['field'] == 'shippingMethod'
     assert data['errors'][0]['message'] == (
         'Shipping method cannot be used with this order.')
+
+
+def test_draft_order_clear_shipping_method(
+        staff_api_client, draft_order, permission_manage_orders):
+    assert draft_order.shipping_method
+    query = ORDER_UPDATE_SHIPPING_QUERY
+    order_id = graphene.Node.to_global_id('Order', draft_order.id)
+    variables = {'order': order_id, 'shippingMethod': None}
+    response = staff_api_client.post_graphql(
+        query, variables, permissions=[permission_manage_orders])
+    content = get_graphql_content(response)
+    data = content['data']['orderUpdateShipping']
+    assert data['order']['id'] == order_id
+    draft_order.refresh_from_db()
+    assert draft_order.shipping_method is None
+    assert draft_order.shipping_price == ZERO_TAXED_MONEY
+    assert draft_order.shipping_method_name is None
 
 
 def test_orders_total(
