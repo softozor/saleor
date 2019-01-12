@@ -34,13 +34,13 @@ pytest==4.0.2
 python-slugify==1.2.6
 pyyaml==3.13
 requests==2.21.0
-six==1.12.0
+six==1.11.0
 snowballstemmer==1.2.1
 toml==0.10.0
 tox==3.6.1
 transifex-client==0.13.5
 unidecode==1.0.23
-urllib3==1.24.1
+urllib3==1.23
 vcrpy==2.0.1
 virtualenv==16.2.0
 wrapt==1.10.11

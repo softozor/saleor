@@ -576,34 +576,34 @@ PAYMENT_GATEWAYS = {
             'public_key': os.environ.get('BRAINTREE_PUBLIC_KEY'),
             'private_key': os.environ.get('BRAINTREE_PRIVATE_KEY')
         }
-    },
-    RAZORPAY: {
-        'module': 'saleor.payment.gateways.razorpay',
-        'connection_params': {
-            'public_key': os.environ.get('RAZORPAY_PUBLIC_KEY'),
-            'secret_key': os.environ.get('RAZORPAY_SECRET_KEY'),
-            'prefill': get_bool_from_env('RAZORPAY_PREFILL', True),
-            'store_name': os.environ.get('RAZORPAY_STORE_NAME'),
-            'store_image': os.environ.get('RAZORPAY_STORE_IMAGE')
-        }
-    },
-    STRIPE: {
-        'module': 'saleor.payment.gateways.stripe',
-        'connection_params': {
-            'public_key': os.environ.get('STRIPE_PUBLIC_KEY'),
-            'secret_key': os.environ.get('STRIPE_SECRET_KEY'),
-            'store_name': os.environ.get(
-                'STRIPE_STORE_NAME', 'Saleor'),
-            'store_image': os.environ.get('STRIPE_STORE_IMAGE', None),
-            'prefill': get_bool_from_env('STRIPE_PREFILL', True),
-            'remember_me': os.environ.get('STRIPE_REMEMBER_ME', True),
-            'locale': os.environ.get('STRIPE_LOCALE', 'auto'),
-            'enable_billing_address': os.environ.get(
-                'STRIPE_ENABLE_BILLING_ADDRESS', False),
-            'enable_shipping_address': os.environ.get(
-                'STRIPE_ENABLE_SHIPPING_ADDRESS', False)
-        }
-    }
+    }#,
+    # RAZORPAY: {
+    #     'module': 'saleor.payment.gateways.razorpay',
+    #     'connection_params': {
+    #         'public_key': os.environ.get('RAZORPAY_PUBLIC_KEY'),
+    #         'secret_key': os.environ.get('RAZORPAY_SECRET_KEY'),
+    #         'prefill': get_bool_from_env('RAZORPAY_PREFILL', True),
+    #         'store_name': os.environ.get('RAZORPAY_STORE_NAME'),
+    #         'store_image': os.environ.get('RAZORPAY_STORE_IMAGE')
+    #     }
+    # },
+    # STRIPE: {
+    #     'module': 'saleor.payment.gateways.stripe',
+    #     'connection_params': {
+    #         'public_key': os.environ.get('STRIPE_PUBLIC_KEY'),
+    #         'secret_key': os.environ.get('STRIPE_SECRET_KEY'),
+    #         'store_name': os.environ.get(
+    #             'STRIPE_STORE_NAME', 'Saleor'),
+    #         'store_image': os.environ.get('STRIPE_STORE_IMAGE', None),
+    #         'prefill': get_bool_from_env('STRIPE_PREFILL', True),
+    #         'remember_me': os.environ.get('STRIPE_REMEMBER_ME', True),
+    #         'locale': os.environ.get('STRIPE_LOCALE', 'auto'),
+    #         'enable_billing_address': os.environ.get(
+    #             'STRIPE_ENABLE_BILLING_ADDRESS', False),
+    #         'enable_shipping_address': os.environ.get(
+    #             'STRIPE_ENABLE_SHIPPING_ADDRESS', False)
+    #     }
+    # }
 }
 
 GRAPHENE = {
