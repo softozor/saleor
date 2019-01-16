@@ -5,6 +5,7 @@ from string import Template
 
 from shopozor_features.fixtures.graphql import graphql_query
 from shopozor_features.steps.exceptions import UnknownUserTypeError
+import shopozor_features.parsedArgTypes
 
 
 @given(u'un utilisateur non identifié sur le Shopozor')
@@ -34,14 +35,13 @@ def is_staff(user_type):
         'administrateur': True
     }
 
-    # TODO: the KeyError exception is never triggered...
     try:
         return switch[user_type]
     except KeyError:
         raise UnknownUserTypeError(Template(u'Unknown user type $type').substitute(user_type))
 
 
-@when(u'un {user_type:w} s\'identifie en tant que {pretended_type:w} avec un e-mail et un mot de passe invalides')
+@when(u'un {user_type:UserType} s\'identifie en tant que {pretended_type:UserType} avec un e-mail et un mot de passe invalides')
 def step_impl(context, user_type, pretended_type):
     use_fixture(graphql_query, context, 'login.graphql')
 
