@@ -56,7 +56,6 @@ Fonctionnalité: Identifier un utilisateur
       | administrateur | administrateur       |
       | administrateur | client               |
 
-  @current
   Scénario: Un client ne peut pas s'identifier en tant qu'administrateur
     Lorsqu'un client s'identifie en tant qu'administrateur avec un e-mail et un mot de passe valides
     Alors il obtient un message d'erreur stipulant que ses identifiants sont incorrects

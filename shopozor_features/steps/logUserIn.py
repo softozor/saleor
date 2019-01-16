@@ -17,8 +17,7 @@ def step_impl(context):
     use_fixture(graphql_query, context, 'login.graphql')
     variables = {'email': context.customer['email'], 'password': context.customer['password']}
     response = context.test.client.post_graphql(context.query, variables)
-    content = get_graphql_content(response)
-    context.response = content
+    context.response = get_graphql_content(response)
 
 
 @then(u'il obtient un message d\'erreur stipulant que ses identifiants sont incorrects')
@@ -69,8 +68,7 @@ def step_impl(context, user_type, pretended_type, validity):
     else:
         variables = invalid_mail_and_password(is_staff(pretended_type), context)
     response = context.test.client.post_graphql(context.query, variables)
-    content = get_graphql_content(response)
-    context.response = content
+    context.response = get_graphql_content(response)
 
 
 def valid_mail_invalid_password(user_type, is_staff_user, context):
@@ -88,11 +86,9 @@ def step_impl(context, user_type, pretended_type):
     use_fixture(graphql_query, context, 'login.graphql')
     variables = valid_mail_invalid_password(user_type, is_staff(pretended_type), context)
     response = context.test.client.post_graphql(context.query, variables)
-    content = get_graphql_content(response)
-    context.response = content
+    context.response = get_graphql_content(response)
 
 
-# TODO: define type for the duration
-@then(u'sa session sécurisée s\'ouvre pour 1 mois')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then sa session sécurisée s\'ouvre pour 1 mois')
+@then(u'sa session sécurisée s\'ouvre pour {amount:d} {unit:DurationInSecondsType}')
+def step_impl(context, amount, unit):
+    context.test.assertEqual(context.test.client.session.get_expiry_age(), amount * unit)
