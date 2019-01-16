@@ -4,7 +4,7 @@ from behave import use_fixture
 from shopozor_features.fixtures.graphql import graphql_query
 from tests.api.utils import get_graphql_content
 
-import shopozor_features.parsedArgTypes
+import shopozor_features.types
 
 
 @given(u'un utilisateur non identifié sur le Shopozor')
@@ -36,19 +36,63 @@ def is_staff(user_type):
     return switch[user_type]
 
 
-def user_type_to_query_variables(user_type, is_staff_user, context):
+def valid_mail_and_password(user_type, is_staff_user, context):
     switch = {
-        'client': dict(email=context.customer['email'], password=context.customer['password'], isStaff=is_staff_user),
-        'administrateur': dict(email=context.staff['email'], password=context.staff['password'], isStaff=is_staff_user)
+        'client': dict(
+            email=context.customer['email'],
+            password=context.customer['password'],
+            isStaff=is_staff_user
+        ),
+        'administrateur': dict(
+            email=context.staff['email'],
+            password=context.staff['password'],
+            isStaff=is_staff_user
+        )
+    }
+    return switch[user_type]
+
+
+def invalid_mail_and_password(is_staff_user, context):
+    return dict(
+        email=context.unknown['email'],
+        password=context.unknown['password'],
+        isStaff=is_staff_user
+    )
+
+
+@when(
+    u'un {user_type:UserType} s\'identifie en tant que {pretended_type:UserType} avec un e-mail et un mot de passe {validity:ValidityType}')
+def step_impl(context, user_type, pretended_type, validity):
+    use_fixture(graphql_query, context, 'login.graphql')
+    if validity:
+        variables = valid_mail_and_password(user_type, is_staff(pretended_type), context)
+    else:
+        variables = invalid_mail_and_password(is_staff(pretended_type), context)
+    response = context.test.client.post_graphql(context.query, variables)
+    content = get_graphql_content(response)
+    context.response = content
+
+
+def valid_mail_invalid_password(user_type, is_staff_user, context):
+    switch = {
+        'client': dict(email=context.customer['email'], password=context.unknown['password'], isStaff=is_staff_user),
+        'administrateur': dict(email=context.staff['email'], password=context.unknown['password'],
+                               isStaff=is_staff_user)
     }
     return switch[user_type]
 
 
 @when(
-    u'un {user_type:UserType} s\'identifie en tant que {pretended_type:UserType} avec un e-mail et un mot de passe invalides')
+    u'un {user_type:UserType} s\'identifie en tant que {pretended_type:UserType} avec un e-mail valide et un mot de passe invalide')
 def step_impl(context, user_type, pretended_type):
     use_fixture(graphql_query, context, 'login.graphql')
-    variables = user_type_to_query_variables(user_type, is_staff(pretended_type), context)
+    variables = valid_mail_invalid_password(user_type, is_staff(pretended_type), context)
     response = context.test.client.post_graphql(context.query, variables)
     content = get_graphql_content(response)
     context.response = content
+
+
+# TODO: define type for the duration
+@then(u'sa session sécurisée s\'ouvre pour 1 mois')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: Then sa session sécurisée s\'ouvre pour 1 mois')

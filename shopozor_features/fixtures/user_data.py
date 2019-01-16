@@ -30,6 +30,7 @@ def staff(context):
     yield context.staff
     del context.staff
 
+
 @fixture
 def unknown(context):
     password = 'password'
