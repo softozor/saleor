@@ -1,11 +1,11 @@
-from behave import given, when
+from behave import given, when, then
 from tests.api.utils import get_graphql_content
 from behave import use_fixture
 
-from shopozor_features.fixtures.graphql_queries import login_query
+from shopozor_features.fixtures.graphql import graphql_query
 
 
-# TODO: make sure that DJANGO_SETTINGS_MODULE=shopozor.settings
+# TODO: make sure that DJANGO_SETTINGS_MODULE=shopozor_features.settings
 @given(u'un utilisateur non identifié sur le Shopozor')
 def step_impl(context):
     context.test.assertFalse(hasattr(context.test.client, 'token'))
@@ -13,13 +13,15 @@ def step_impl(context):
 
 @when(u'un client s\'identifie en tant qu\'administrateur avec un e-mail et un mot de passe valides')
 def step_impl(context):
-    use_fixture(login_query, context)
-    variables = {'email': 'laurent.michel@softozor.ch', 'password': 'password'}
+    use_fixture(graphql_query, context, 'loginStaff.graphql')
+    variables = {'email': context.customer['email'], 'password': context.customer['password']}
     response = context.test.client.post_graphql(context.query, variables)
     content = get_graphql_content(response)
-    print("CONTENT = ", content)
-    # token_data = content['data']['tokenCreate']
-    # assert token_data['token']
-    # assert not token_data['errors']
-    #
-    raise NotImplementedError(u'STEP: When un client s\'identifie en tant qu\'administrateur avec un e-mail et un mot de passe valides')
+    context.response = content
+
+
+@then(u'il obtient un message d\'erreur stipulant que ses identifiants sont incorrects')
+def step_impl(context):
+    token_data = context.response['data']['loginStaff']
+    context.test.assertIsNone(token_data['token'])
+    context.test.assertEqual(token_data['errors']['message'], 'Wrong credentials')
