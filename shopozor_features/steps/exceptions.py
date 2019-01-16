@@ -1,0 +1,2 @@
+class UnknownUserTypeError(Exception):
+    pass

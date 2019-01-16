@@ -1,9 +1,0 @@
-mutation LoginStaff($email: String!, $password: String!) {
-  loginStaff(email: $email, password: $password) {
-    token
-    errors {
-      field
-      message
-    }
-  }
-}
