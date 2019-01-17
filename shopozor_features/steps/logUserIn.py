@@ -89,6 +89,9 @@ def step_impl(context, user_type, pretended_type):
     context.response = get_graphql_content(response)
 
 
-@then(u'sa session sécurisée s\'ouvre pour {amount:d} {unit:DurationInSecondsType}')
-def step_impl(context, amount, unit):
-    context.test.assertEqual(context.test.client.session.get_expiry_age(), amount * unit)
+@then(u'il reçoit un token d\'authentification')
+def step_impl(context):
+    token_data = context.response['data']['login']
+    context.test.assertIsNotNone(token_data['token'])
+    context.test.assertIsNone(token_data['errors'])
+

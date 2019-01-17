@@ -1,4 +1,5 @@
 from saleor.settings import *
+from datetime import timedelta
 
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
@@ -7,8 +8,17 @@ if DEBUG:
     MIDDLEWARE = CORS_MIDDLEWARE + MIDDLEWARE
     INSTALLED_APPS.append('corsheaders')
 
+
 INSTALLED_APPS.remove('saleor.graphql')
 INSTALLED_APPS.append('shopozor.graphql')
 INSTALLED_APPS.append('behave_django')
 
 ROOT_URLCONF = 'shopozor.urls'
+
+
+
+GRAPHQL_JWT = {
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': timedelta(days=30),
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=360)
+}
